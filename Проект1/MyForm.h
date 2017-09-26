@@ -113,9 +113,10 @@ namespace Проект1 {
 			vec2point(A1, a);
 			vec2point(B1, b);
 			g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
+			
 		}
 	}
-	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click
+	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click on btn
 		if (this->openFileDialog->ShowDialog() ==
 			System::Windows::Forms::DialogResult::OK) {
 			wchar_t fileName[1024];
@@ -173,25 +174,25 @@ namespace Проект1 {
 			rotate(0.05, R);
 			break;
 		case Keys::X:
-			scale(1 / 1.1, R);
-			break;
-		case Keys::Z:
+			scale(1.1, R);
+			break; //end template code
+
+		case Keys::Q:
 			rotate(-0.05, R);
 			break;
-		case Keys::Q:
-			scale(1 / 0.9, R);
+		case Keys::Z:
+			scale(1/1.1, R);
 			break;
-
-		case Keys::I:
+		case Keys::T:
 			move(0, -5, R);
 			break;
-		case Keys::O:
+		case Keys::G:
 			move(0, 5, R);
 			break;
-		case Keys::K:
+		case Keys::F:
 			move(-5, 0, R);
 			break;
-		case Keys::L:
+		case Keys::H:
 			move(5, 0, R);
 			break;
 		case Keys::U:
@@ -199,24 +200,6 @@ namespace Проект1 {
 			break;
 		case Keys::J:
 			mirror(1, width, height, R, T);
-			break;
-		case Keys::C:
-			move(-width / 2, -height / 2, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale(1 / 1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(width / 2, height / 2, R);
-			break;
-		case Keys::V:
-			move(-width / 2, -height / 2, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale(1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(width / 2, height / 2, R);
 			break;
 		case Keys::R:
 			move(-width / 2, -height / 2, R);
@@ -236,8 +219,29 @@ namespace Проект1 {
 			set(T1, T);
 			move(width / 2, height / 2, R);
 			break;
+		case Keys::C:
+			move(-width / 2, -height / 2, R);
+			times(R, T, T1);
+			set(T1, T);
+			scale(1 / 1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(width / 2, height / 2, R);
+			break;
+		case Keys::V:
+			move(-width / 2, -height / 2, R);
+			times(R, T, T1);
+			set(T1, T);
+			scale(1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(width / 2, height / 2, R);
+			break;
 
-		case Keys::T:
+
+		
+
+		case Keys::K:
 			move(0, -height / 2, R);
 			times(R, T, T1);
 			set(T1, T);
@@ -246,7 +250,7 @@ namespace Проект1 {
 			set(T1, T);
 			move(0, height / 2, R);
 			break;
-		case Keys::G:
+		case Keys::I:
 			move(0, -height / 2, R);
 			times(R, T, T1);
 			set(T1, T);
@@ -255,7 +259,7 @@ namespace Проект1 {
 			set(T1, T);
 			move(0, height / 2, R);
 			break;
-		case Keys::F:
+		case Keys::L:
 			move(-width / 2, 0, R);
 			times(R, T, T1);
 			set(T1, T);
@@ -264,7 +268,7 @@ namespace Проект1 {
 			set(T1, T);
 			move(width / 2, 0, R);
 			break;
-		case Keys::H:
+		case Keys::O:
 			move(-width / 2, 0, R);
 			times(R, T, T1);
 			set(T1, T);
@@ -273,6 +277,7 @@ namespace Проект1 {
 			set(T1, T);
 			move(width / 2, 0, R);
 			break;
+
 		case Keys::Escape:
 			unit(T);
 			unit(R);

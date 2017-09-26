@@ -88,7 +88,7 @@ void mirror(int mirror, float width, float height, mat c, mat t) {
 }
 
 
-void scale_x(float S, mat c) {
+void scale_x(float S, mat c) { 
 	unit(c);
 	c[0][0] = S; c[1][1] = 1;
 }
