@@ -156,7 +156,7 @@ namespace Проект1 {
 		}
 	}
 	private: System::Void Form1_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
-		const int RANGE = 8;
+		const int RANGE = 42;
 		static int counterX = 0;
 		static int counterZ = 0;
 		mat R, T1;
@@ -177,9 +177,9 @@ namespace Проект1 {
 			rotate(0.05, R);
 			break;
 		case Keys::X:
-			if (-RANGE <= counterX && counterX <= RANGE) { 
+			if (-RANGE < counterX && counterX < RANGE) { 
 				counterX++;
-				counterZ--;
+				if (-RANGE < counterZ - 1) {counterZ--;}
 				scale(1.1, R);
 			}
 			else {
@@ -193,9 +193,9 @@ namespace Проект1 {
 			break;
 		case Keys::Z:
 			//if (-RANGE <= counterX && counterX <= RANGE) { counterX--; }
-			if (-RANGE <= counterZ && counterZ <= RANGE) {
+			if (-RANGE < counterZ && counterZ < RANGE) {
 				counterZ++;
-				counterX--;
+				if (-RANGE < counterX - 1) { counterX--; }
 				scale(1 / 1.1, R);
 			} else {
 				scale(1.0, R);
