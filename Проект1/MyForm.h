@@ -34,12 +34,15 @@ namespace Проект1 {
 				delete components;
 			}
 		}
-	private:
-		System::Collections::Generic::List<line> lines;
+	private:System::Collections::Generic::List<line> lines;
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog;
 	private: System::Windows::Forms::Button^  btnOpen;
 	private: float height;
 	private: float width;
+	private: float left, right, top, bottom; //new template
+	private: float Wcx, Wcy, Wx, Wy;
+	private: float Vcx, Vcy, Vx, Vy;
+
 	private:
 		/// <summary>
 		/// Требуется переменная конструктора.
@@ -66,12 +69,19 @@ namespace Проект1 {
 			// 
 			// btnOpen
 			// 
+			this->btnOpen->AllowDrop = true;
+			this->btnOpen->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->btnOpen->AutoEllipsis = true;
+			this->btnOpen->AutoSize = true;
+			this->btnOpen->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
 			this->btnOpen->BackColor = System::Drawing::SystemColors::ControlDark;
-			this->btnOpen->Location = System::Drawing::Point(623, 34);
+			this->btnOpen->Location = System::Drawing::Point(733, 12);
+			this->btnOpen->MinimumSize = System::Drawing::Size(100, 100);
 			this->btnOpen->Name = L"btnOpen";
-			this->btnOpen->Size = System::Drawing::Size(303, 119);
+			this->btnOpen->Size = System::Drawing::Size(102, 100);
 			this->btnOpen->TabIndex = 0;
-			this->btnOpen->Text = L"Приоткрыть";
+			this->btnOpen->Text = L"Открыть портал!";
 			this->btnOpen->UseVisualStyleBackColor = false;
 			this->btnOpen->Click += gcnew System::EventHandler(this, &Form1::btnOpen_Click);
 			// 
@@ -82,16 +92,27 @@ namespace Проект1 {
 			this->ClientSize = System::Drawing::Size(990, 702);
 			this->Controls->Add(this->btnOpen);
 			this->KeyPreview = true;
+			this->MinimumSize = System::Drawing::Size(600, 400);
 			this->Name = L"Form1";
 			this->Text = L"Form1";
 			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
 			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::Form1_Paint);
 			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::Form1_KeyDown);
+			this->Resize += gcnew System::EventHandler(this, &Form1::Form1_Resize);
 			this->ResumeLayout(false);
+			this->PerformLayout();
 
 		}
 #pragma endregion
-	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) {
+	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) { //процедура загрузки формы
+		left = 30; //точно нулю? есть сомнения
+		right = 30;
+		top = 120;
+		bottom = 30;
+		Wcx = left; //template
+		Wcy = Form::ClientRectangle.Height - bottom;
+		Wx = Form::ClientRectangle.Width - left - right;
+		Wy = Form::ClientRectangle.Height - top - bottom;
 		lines.Clear();
 		unit(T);
 	}
@@ -101,6 +122,9 @@ namespace Проект1 {
 		width = rect.Width;
 		height = rect.Height;
 		System::Drawing::Pen^ blackPen = gcnew Pen(Color::Black);
+		System::Drawing::Pen^ rectPen = gcnew Pen(Color::Green);
+		rectPen->Width = 8;
+		g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
 		blackPen->Width = 4;
 		for (int i = 0; i<lines.Count; i++) {
 			vec A, B;
@@ -316,5 +340,12 @@ namespace Проект1 {
 		set(T1, T);
 		this->Refresh();
 	}
-	};
+	private: System::Void Form1_Resize(System::Object^  sender, System::EventArgs^  e) { //TODO
+		Wcx = left;
+		Wcy = Form::ClientRectangle.Height - bottom;
+		Wx = Form::ClientRectangle.Width - left - right;
+		Wy = Form::ClientRectangle.Height - top - bottom;
+		this->Refresh(); //обновляет форму?
+	}
+};
 }
