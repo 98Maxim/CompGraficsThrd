@@ -42,6 +42,7 @@ namespace Проект1 {
 	private: float left, right, top, bottom; //new template
 	private: float Wcx, Wcy, Wx, Wy;
 	private: float Vcx, Vcy, Vx, Vy;
+	bool drawNames;
 
 	private:
 		/// <summary>
@@ -105,6 +106,7 @@ namespace Проект1 {
 		}
 #pragma endregion
 	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) { //процедура загрузки формы
+		drawNames = false;
 		left = 30; //точно нулю? есть сомнения
 		right = 30;
 		top = 120;
@@ -136,7 +138,28 @@ namespace Проект1 {
 			point a, b;
 			vec2point(A1, a);
 			vec2point(B1, b);
-			g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
+			
+			if (clip(a, b, min, max)) 
+					 {
+						 g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
+
+						 float sx = a.x + (b.x - a.x) / 2;
+						 float sy = a.y + (b.y - a.y) / 2;
+						 float delta = 10;
+
+						 if(
+							 drawNames 
+							 && sx >= left + delta 
+							 && sx <= left + Wx - delta
+							 && sy >= top + delta 
+							 && sy <= top + Wy - delta) 
+						 {
+							 g->DrawString(lines[i].name, drawFont, drawBrush, sx, sy);
+						 }
+
+					 }
+			
+			// g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
 			
 		}
 	}
@@ -150,6 +173,7 @@ namespace Проект1 {
 			std::ifstream in;
 			in.open(fileName);
 			if (in.is_open()) {
+				bool read = false;
 				lines.Clear();
 				unit(T);
 				std::string str;
@@ -159,23 +183,40 @@ namespace Проект1 {
 						&& (str[0] != '#')) {
 						std::stringstream s(str);
 						line l;
-						s >> l.start.x >> l.start.y >> l.end.x >> l.end.y;
 						std::string linename;
-						s >> linename;
-						l.name = gcnew String(linename.c_str());
-						lines.Add(l);
+						float x, y, w, h;
+								 if(!read) {
+									 s >> x >> y >> w >> h;
+									 Vcx = x;
+									 Vcy = y;
+									 Vx = w;
+									 Vy = h;
+									 read = true;
+								 }
+								 else {
+									 s >> l.start.x >> l.start.y >> l.end.x >> l.end.y >> linename;
+									 l.name = gcnew String(linename.c_str());
+									 lines.Add(l); //Iiiauaai io?acie a eiiao nienea
+								 }						
+					//s >> l.start.x >> l.start.y >> l.end.x >> l.end.y;
+						//std::string linename;
+						//s >> linename;
+						//l.name = gcnew String(linename.c_str());
+						//lines.Add(l);
 					}
 					getline(in, str);
 				}
-				mat R, T1;
-				mirror(1, width, height, R, T);
-				times(R, T, T1);
-				set(T1, T);
-				unit(R);
-				move(0, -height / 2, R);
-				times(R, T, T1);
-				set(T1, T);
-				this->Refresh();
+				// mat R, T1;
+				// mirror(1, width, height, R, T);
+				// times(R, T, T1);
+				// set(T1, T);
+				// unit(R);
+				// move(0, -height / 2, R);
+				// times(R, T, T1);
+				// set(T1, T);
+				frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
+					 this->Refresh();
+				
 			}
 		}
 	}
@@ -321,18 +362,23 @@ namespace Проект1 {
 			break;
 
 		case Keys::Escape:
-			unit(T);
-			unit(R);
-			mirror(1, width, height, R, T);
-			times(R, T, T1);
-			set(T1, T);
-			unit(R);
-			move(0, -height / 2, R);
-			times(R, T, T1);
-			set(T1, T);
-			unit(R);
+			// unit(T);
+			// unit(R);
+			// mirror(1, width, height, R, T);
+			// times(R, T, T1);
+			// set(T1, T);
+			// unit(R);
+			// move(0, -height / 2, R);
+			// times(R, T, T1);
+			// set(T1, T);
+			// unit(R);
+			frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
 			counterX = 0;
 			counterZ = 0;
+			
+		case Keys::P:
+			drawNames = !drawNames;
+			break;
 
 		default:unit(R);
 		}

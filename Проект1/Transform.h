@@ -25,3 +25,4 @@ void scale(float S, mat c);
 void mirror(int mirror, float height, float width, mat c, mat t);
 void scale_x(float S, mat c);
 void scale_y(float S, mat c);
+void frame (float Vx, float Vy, float Vcx, float Vcy, float Wx, float Wy, float Wcx, float Wcy, mat c);

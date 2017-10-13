@@ -96,3 +96,21 @@ void scale_y(float S, mat c) {
 	unit(c);
 	c[0][0] = 1; c[1][1] = S;
 }
+void frame (float Vx, float Vy, float Vcx, float Vcy, float Wx, float Wy, float Wcx, float Wcy, mat c){
+	
+	unit(c);
+	mat t, c1;
+
+	move(-Vcx, -Vcy, t);
+	times(t, c, c1);
+
+	scale(Wx / Vx, Wy / Vy, t);
+	times(t, c1, c);
+
+	z_goriz(t);
+	times(t, c, c1);
+
+	move(Wcx, Wcy, t);
+	times(t, c1, c);
+
+}
