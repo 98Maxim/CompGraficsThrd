@@ -1,4 +1,9 @@
 #pragma once
+#include <fstream>
+#include <sstream>
+#include "Clip.h"
+#include "Transform.h"
+#include <iostream>
 
 namespace Проект1 {
 
@@ -10,12 +15,12 @@ namespace Проект1 {
 	using namespace System::Drawing;
 
 	/// <summary>
-	/// Сводка для Form1
+	/// Сводка для MyForm
 	/// </summary>
-	public ref class Form1 : public System::Windows::Forms::Form
+	public ref class MyForm : public System::Windows::Forms::Form
 	{
 	public:
-		Form1(void)
+		MyForm(void)
 		{
 			InitializeComponent();
 			//
@@ -27,7 +32,7 @@ namespace Проект1 {
 		/// <summary>
 		/// Освободить все используемые ресурсы.
 		/// </summary>
-		~Form1()
+		~MyForm()
 		{
 			if (components)
 			{
@@ -84,9 +89,9 @@ namespace Проект1 {
 			this->btnOpen->TabIndex = 0;
 			this->btnOpen->Text = L"Открыть портал!";
 			this->btnOpen->UseVisualStyleBackColor = false;
-			this->btnOpen->Click += gcnew System::EventHandler(this, &Form1::btnOpen_Click);
+			this->btnOpen->Click += gcnew System::EventHandler(this, &MyForm::btnOpen_Click);
 			// 
-			// Form1
+			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
@@ -94,20 +99,20 @@ namespace Проект1 {
 			this->Controls->Add(this->btnOpen);
 			this->KeyPreview = true;
 			this->MinimumSize = System::Drawing::Size(600, 400);
-			this->Name = L"Form1";
-			this->Text = L"Form1";
-			this->Load += gcnew System::EventHandler(this, &Form1::Form1_Load);
-			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::Form1_Paint);
-			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &Form1::Form1_KeyDown);
-			this->Resize += gcnew System::EventHandler(this, &Form1::Form1_Resize);
+			this->Name = L"MyForm";
+			this->Text = L"MyForm";
+			this->Load += gcnew System::EventHandler(this, &MyForm::MyForm_Load);
+			this->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &MyForm::MyForm_Paint);
+			this->KeyDown += gcnew System::Windows::Forms::KeyEventHandler(this, &MyForm::MyForm_KeyDown);
+			this->Resize += gcnew System::EventHandler(this, &MyForm::MyForm_Resize);
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) { //процедура загрузки формы
+	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) { //процедура загрузки формы
 		drawNames = false;
-		left = 30; //точно нулю? есть сомнения
+		left = 30; 
 		right = 30;
 		top = 120;
 		bottom = 30;
@@ -115,10 +120,12 @@ namespace Проект1 {
 		Wcy = Form::ClientRectangle.Height - bottom;
 		Wx = Form::ClientRectangle.Width - left - right;
 		Wy = Form::ClientRectangle.Height - top - bottom;
+		//aaaaaaaa
+
 		lines.Clear();
 		unit(T);
 	}
-	private: System::Void Form1_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
+	private: System::Void MyForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 		System::Drawing::Graphics^ g = e->Graphics;
 		Rectangle rect = Form::ClientRectangle;
 		width = rect.Width;
@@ -128,6 +135,10 @@ namespace Проект1 {
 		rectPen->Width = 8;
 		g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
 		blackPen->Width = 4;
+		
+
+		
+
 		for (int i = 0; i<lines.Count; i++) {
 			vec A, B;
 			point2vec(lines[i].start, A);
@@ -138,29 +149,15 @@ namespace Проект1 {
 			point a, b;
 			vec2point(A1, a);
 			vec2point(B1, b);
-			
-			if (clip(a, b, min, max)) 
-					 {
-						 g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
-
-						 float sx = a.x + (b.x - a.x) / 2;
-						 float sy = a.y + (b.y - a.y) / 2;
-						 float delta = 10;
-
-						 if(
-							 drawNames 
-							 && sx >= left + delta 
-							 && sx <= left + Wx - delta
-							 && sy >= top + delta 
-							 && sy <= top + Wy - delta) 
-						 {
-							 g->DrawString(lines[i].name, drawFont, drawBrush, sx, sy);
-						 }
-
-					 }
-			
-			// g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
-			
+			if (Clip(a.x, b.x, a.y, b.y, Wcx, Wcy - Wy, Wcx + Wx, Wcy))
+				g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
+			if (drawNames)
+			{
+				System::Drawing::Font^ drawFont = gcnew System::Drawing::Font("Arial", 10);
+				SolidBrush^ drawBrush = gcnew SolidBrush(Color::Blue);
+				if (Clip(a.x, b.x, a.y, b.y, Wcx, Wcy - Wy, Wcx + Wx, Wcy))
+					g->DrawString(lines[i].name, drawFont, drawBrush, (a.x + b.x) / 2, (a.y + b.y) / 2);
+			}
 		}
 	}
 	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click on btn
@@ -206,21 +203,21 @@ namespace Проект1 {
 					}
 					getline(in, str);
 				}
-				// mat R, T1;
-				// mirror(1, width, height, R, T);
-				// times(R, T, T1);
-				// set(T1, T);
-				// unit(R);
-				// move(0, -height / 2, R);
-				// times(R, T, T1);
-				// set(T1, T);
+				 mat R, T1;
+				 mirror(1, width, height, R, T);
+				 times(R, T, T1);
+				 set(T1, T);
+				 unit(R);
+				 move(0, -height / 2, R);
+				 times(R, T, T1);
+				 set(T1, T);
 				frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
 					 this->Refresh();
 				
 			}
 		}
 	}
-	private: System::Void Form1_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		const int RANGE = 42;
 		static int counterX = 0;
 		static int counterZ = 0;
@@ -245,10 +242,11 @@ namespace Проект1 {
 			if (-RANGE < counterX && counterX < RANGE) { 
 				counterX++;
 				if (-RANGE < counterZ - 1) {counterZ--;}
-				scale(1.1, R);
+				
+				scale(1.1, 1.1, R);
 			}
 			else {
-				scale(1.0, R);
+				scale(1.0, 1.0, R); 
 			}
 			//if (-RANGE <= counterZ <= RANGE) { counterZ--; }
 			break; //end template code
@@ -261,9 +259,9 @@ namespace Проект1 {
 			if (-RANGE < counterZ && counterZ < RANGE) {
 				counterZ++;
 				if (-RANGE < counterX - 1) { counterX--; }
-				scale(1 / 1.1, R);
+				scale(1 / 1.1, 1 / 1.1, R);
 			} else {
-				scale(1.0, R);
+				scale(1.0, 1.0, R);
 			}
 			break;
 		case Keys::T:
@@ -306,7 +304,7 @@ namespace Проект1 {
 			move(-width / 2, -height / 2, R);
 			times(R, T, T1);
 			set(T1, T);
-			scale(1 / 1.1, R);
+			scale(1/1.1, 1/1.1, R);
 			times(R, T, T1);
 			set(T1, T);
 			move(width / 2, height / 2, R);
@@ -315,7 +313,7 @@ namespace Проект1 {
 			move(-width / 2, -height / 2, R);
 			times(R, T, T1);
 			set(T1, T);
-			scale(1.1, R);
+			scale(1.1, 1.1, R);
 			times(R, T, T1);
 			set(T1, T);
 			move(width / 2, height / 2, R);
@@ -362,16 +360,16 @@ namespace Проект1 {
 			break;
 
 		case Keys::Escape:
-			// unit(T);
-			// unit(R);
-			// mirror(1, width, height, R, T);
-			// times(R, T, T1);
-			// set(T1, T);
-			// unit(R);
-			// move(0, -height / 2, R);
-			// times(R, T, T1);
-			// set(T1, T);
-			// unit(R);
+			 unit(T);
+			 unit(R);
+			 mirror(1, width, height, R, T);
+			 times(R, T, T1);
+			 set(T1, T);
+			 unit(R);
+			 move(0, -height / 2, R);
+			 times(R, T, T1);
+			 set(T1, T);
+			 unit(R);
 			frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
 			counterX = 0;
 			counterZ = 0;
@@ -386,7 +384,7 @@ namespace Проект1 {
 		set(T1, T);
 		this->Refresh();
 	}
-	private: System::Void Form1_Resize(System::Object^  sender, System::EventArgs^  e) { //TODO
+	private: System::Void MyForm_Resize(System::Object^  sender, System::EventArgs^  e) { //TODO
 		Wcx = left;
 		Wcy = Form::ClientRectangle.Height - bottom;
 		Wx = Form::ClientRectangle.Width - left - right;

@@ -65,9 +65,19 @@ void rotate(float phi, mat c) {
 	c[1][0] = sin(phi); c[1][1] = cos(phi);
 }
 
-void scale(float S, mat c) {
+//void scale(float S, mat c) {
+//	unit(c);
+//	c[0][0] = S; c[1][1] = S;
+//}
+void scale(float Sx, float Sy, mat c) {
 	unit(c);
-	c[0][0] = S; c[1][1] = S;
+	c[0][0] = Sx;
+	c[1][1] = Sy;
+}
+
+void z_goriz(mat c) {
+	unit(c);
+	c[1][1] = -1;
 }
 
 
@@ -98,19 +108,35 @@ void scale_y(float S, mat c) {
 }
 void frame (float Vx, float Vy, float Vcx, float Vcy, float Wx, float Wy, float Wcx, float Wcy, mat c){
 	
+	//unit(c);
+	//mat t, c1;
+
+	//move(-Vcx, -Vcy, t);
+	//times(t, c, c1);
+
+	//scale(Wx / Vx, Wy / Vy, t);
+	//times(t, c1, c);
+
+	//z_goriz(t);
+	//times(t, c, c1);
+
+	//move(Wcx, Wcy, t);
+	//times(t, c1, c);
 	unit(c);
-	mat t, c1;
+	mat m1, m2, m3, m4, m5, m6, m7, m8;
 
-	move(-Vcx, -Vcy, t);
-	times(t, c, c1);
+	move(-Vcx, -Vcy, m1);
+	times(m1, c, m2);
 
-	scale(Wx / Vx, Wy / Vy, t);
-	times(t, c1, c);
+	scale(Wx / Vx, Wy / Vy, m3);
+	times(m3, m2, m4);
 
-	z_goriz(t);
-	times(t, c, c1);
+	unit(m5);
+	m5[1][1] = -1;
+	times(m5, m4, m6);
 
-	move(Wcx, Wcy, t);
-	times(t, c1, c);
+	move(Wcx, Wcy, m7);
+	times(m7, m6, m8);
 
+	set(m8, c);
 }

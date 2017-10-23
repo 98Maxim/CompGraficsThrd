@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include <fstream>
 #include <sstream>
+
 #include "Transform.h"
+#include "Clip.h"
 #include "MyForm.h"
+
 using namespace System;
 using namespace System::Windows::Forms;
 
@@ -10,6 +13,6 @@ using namespace System::Windows::Forms;
  void Main(array<String^>^ args) {
  Application::EnableVisualStyles();
  Application::SetCompatibleTextRenderingDefault(false);
- Проект1::Form1 form;
+ Проект1::MyForm form;
  Application::Run(%form);
 }
