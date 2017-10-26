@@ -112,7 +112,7 @@ namespace Проект1 {
 #pragma endregion
 	private: System::Void MyForm_Load(System::Object^  sender, System::EventArgs^  e) { //процедура загрузки формы
 		drawNames = false;
-		left = 30; 
+		left = 70; 
 		right = 30;
 		top = 120;
 		bottom = 30;
@@ -128,11 +128,11 @@ namespace Проект1 {
 	private: System::Void MyForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 		System::Drawing::Graphics^ g = e->Graphics;
 		Rectangle rect = Form::ClientRectangle;
-		width = rect.Width;
-		height = rect.Height;
+		width = rect.Width+(left-right);
+		height = rect.Height+(top-bottom);
 		System::Drawing::Pen^ blackPen = gcnew Pen(Color::Black);
 		System::Drawing::Pen^ rectPen = gcnew Pen(Color::Green);
-		rectPen->Width = 8;
+		rectPen->Width = 2;
 		g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
 		blackPen->Width = 4;
 		
