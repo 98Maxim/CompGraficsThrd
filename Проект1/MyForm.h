@@ -48,6 +48,31 @@ namespace Проект1 {
 	private: float Wcx, Wcy, Wx, Wy;
 	private: float Vcx, Vcy, Vx, Vy;
 	bool drawNames;
+	private: System::Void DrawFigure(Graphics^ g, Pen^ blackPen, Pen^ Pen) {
+		g->DrawRectangle(Pen, -30, -20, 61, 41);
+		g->DrawLine(blackPen, -20, 220 / 13, 5, 220 / 13);
+		g->DrawLine(blackPen, -20, 220 / 13, -20, 60 / 13);
+		g->DrawLine(blackPen, -20, 60 / 13, 5, 60 / 13);
+		g->DrawLine(blackPen, 5, 220 / 13, 5, 60 / 13);
+		g->DrawLine(blackPen, -15, 60 / 13, -15, 20 / 13);
+		g->DrawLine(blackPen, 0, 60 / 13, 0, 20 / 13);
+		g->DrawLine(blackPen, -30, 20 / 13, -30, -20 / 13);
+		g->DrawLine(blackPen, -30, 20 / 13, 30, 20 / 13);
+		g->DrawLine(blackPen, -30, -20 / 13, 30, -20 / 13);
+		g->DrawLine(blackPen, 30, 20 / 13, 30, -20 / 13);
+		g->DrawLine(blackPen, -25, -20 / 13, -25, -20);
+		g->DrawLine(blackPen, -20, -20 / 13, -20, -20);
+		g->DrawLine(blackPen, -25, -20, -20, -20);
+		g->DrawLine(blackPen, 15, 20, 15, 20 / 13);
+		g->DrawLine(blackPen, 25, 20, 25, 20 / 13);
+		g->DrawLine(blackPen, 15, 20, 25, 20);
+		g->DrawLine(blackPen, 17.5, 220 / 13, 22.5, 220 / 13);
+		g->DrawLine(blackPen, 5, -20 / 13, 5, -20);
+		g->DrawLine(blackPen, 25, -20 / 13, 25, -20);
+		g->DrawLine(blackPen, 5, -20, 25, -20);
+		g->DrawLine(blackPen, 10, -100 / 13, 10, -140 / 13);
+		mat c;
+	}
 
 	private:
 		/// <summary>
@@ -89,7 +114,7 @@ namespace Проект1 {
 			this->btnOpen->TabIndex = 0;
 			this->btnOpen->Text = L"Открыть портал!";
 			this->btnOpen->UseVisualStyleBackColor = false;
-			this->btnOpen->Click += gcnew System::EventHandler(this, &MyForm::btnOpen_Click);
+			this->btnOpen->Click += gcnew System::EventHandler(this, &MyForm::button1_Click);
 			// 
 			// MyForm
 			// 
@@ -127,19 +152,34 @@ namespace Проект1 {
 	}
 	private: System::Void MyForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 		System::Drawing::Graphics^ g = e->Graphics;
-		Rectangle rect = Form::ClientRectangle;
-		width = rect.Width+(left-right);
-		height = rect.Height+(top-bottom);
+		Rectangle rect1 = Form::ClientRectangle;
+		width = rect1.Width+(left-right);
+		height = rect1.Height+(top-bottom);
 		System::Drawing::Pen^ blackPen = gcnew Pen(Color::Black);
 		System::Drawing::Pen^ rectPen = gcnew Pen(Color::Green);
 		rectPen->Width = 2;
-		g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
+		//g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
+		Rectangle rect = System::Drawing::Rectangle(Wcx, top, Wx, Wy);
+		g->DrawRectangle(rectPen, rect);
+		g->Clip = gcnew System::Drawing::Region(rect);
 		blackPen->Width = 4;
+		System::Drawing::Pen^ Pen1 = gcnew Pen(Color::Black);
+		Pen1->Width = 1;
+
+		g->Transform = gcnew System::Drawing::Drawing2D::Matrix(T[0][0], T[1][0],
+			T[0][1], T[1][1],
+			T[0][2], T[1][2]);
+		for (int i = 0; i < matrices.size(); i++) {
+			mat С;
+			times(T, matrices[i], С);
+			g->Transform = gcnew System::Drawing::Drawing2D::Matrix(С[0][0], С[1][0], С[0][1], С[1][1], С[0][2], С[1][2]);
+			DrawFigure(g, blackPen, Pen1);
+		}
 		
 
 		
 
-		for (int i = 0; i<lines.Count; i++) {
+		/*for (int i = 0; i<lines.Count; i++) {
 			vec A, B;
 			point2vec(lines[i].start, A);
 			point2vec(lines[i].end, B);
@@ -158,65 +198,85 @@ namespace Проект1 {
 				if (Clip(a.x, b.x, a.y, b.y, Wcx, Wcy - Wy, Wcx + Wx, Wcy))
 					g->DrawString(lines[i].name, drawFont, drawBrush, (a.x + b.x) / 2, (a.y + b.y) / 2);
 			}
-		}
+		}*/
 	}
-	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click on btn
-		if (this->openFileDialog->ShowDialog() ==
-			System::Windows::Forms::DialogResult::OK) {
-			wchar_t fileName[1024];
-			for (int i = 0; i<openFileDialog->FileName->Length; i++)
-				fileName[i] = openFileDialog->FileName[i];
-			fileName[openFileDialog->FileName->Length] = '\0';
-			std::ifstream in;
-			in.open(fileName);
-			if (in.is_open()) {
-				bool read = false;
-				lines.Clear();
-				unit(T);
-				std::string str;
-				getline(in, str);
-				while (in) {
-					if ((str.find_first_not_of(" \t\r\n") != std::string::npos)
-						&& (str[0] != '#')) {
-						std::stringstream s(str);
-						line l;
-						std::string linename;
-						float x, y, w, h;
-								 if(!read) {
-									 s >> x >> y >> w >> h;
-									 Vcx = x;
-									 Vcy = y;
-									 Vx = w;
-									 Vy = h;
-									 read = true;
+		private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+				 if ( this->openFileDialog->ShowDialog() == System::Windows::Forms::DialogResult::OK){
+						wchar_t fileName[1024];
+						for (int i = 0; i < openFileDialog->FileName->Length; i++)
+						fileName[i] = openFileDialog->FileName[i];
+						fileName[openFileDialog->FileName->Length] = '\0';
+						std::ifstream in;
+					 in.open(fileName);
+					 if (in.is_open()) { 
+						 matrices.clear(); 
+						 std::stack<mat> matStack; 
+						 mat K; 
+						 unit(K);
+						 unit(T);
+						 std::string str;
+						 getline (in, str);
+						
+						 while (in) { 
+							 if ((str.find_first_not_of(" \t\r\n") != std::string::npos) && (str[0] != '#')) { 
+
+								 std::stringstream s(str);
+								 std::string cmd; 
+								 s >> cmd; 
+								 if ( cmd == "frame" ) {
+									 float newVcx, newVcy, newVx, newVy;
+									 s >>  newVcx >> newVcy >> newVx >> newVy;
+									 Vcx = newVcx; 
+									 Vcy = newVcy;
+									 Vx = newVx;
+									 Vy = newVy;
+									 frame (Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
 								 }
-								 else {
-									 s >> l.start.x >> l.start.y >> l.end.x >> l.end.y >> linename;
-									 l.name = gcnew String(linename.c_str());
-									 lines.Add(l); //Iiiauaai io?acie a eiiao nienea
-								 }						
-					//s >> l.start.x >> l.start.y >> l.end.x >> l.end.y;
-						//std::string linename;
-						//s >> linename;
-						//l.name = gcnew String(linename.c_str());
-						//lines.Add(l);
-					}
-					getline(in, str);
-				}
-				 mat R, T1;
-				 mirror(1, width, height, R, T);
-				 times(R, T, T1);
-				 set(T1, T);
-				 unit(R);
-				 move(0, -height / 2, R);
-				 times(R, T, T1);
-				 set(T1, T);
-				frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
-					 this->Refresh();
-				
-			}
-		}
-	}
+								 else if ( cmd == "figure" ) {
+									 matrices.push_back(K); 
+								 }
+								 else if ( cmd == "pushTransform" ) {
+									 matStack.push(K);
+								 }
+								 else if ( cmd == "popTransform" ) {
+									 K = matStack.top(); 
+									 matStack.pop(); 
+								 }
+								 else if ( cmd == "translate" ) {
+									 float Tx, Ty; 
+									 s >> Tx >> Ty;
+									 mat C, C1;
+									 move(Tx, Ty, C);
+									 times(K, C, C1);
+									 K = C1;
+								 }
+								 else if ( cmd == "scale" ) {
+									 float S; 
+									 s >> S;
+									 mat C, C1;
+									 scale_x2(S, S, C);
+									 times(K, C, C1);
+									 K = C1;
+								 }
+								 else if ( cmd == "rotate" ) {
+									 float Phi; 
+									 s >> Phi;
+									 float pi = 3.1415926535;
+									 float PhiR = Phi * (pi / 180);
+									 mat C, C1;
+									 rotate(PhiR, C);
+									 times(K, C, C1);
+									 K = C1;
+								 }
+							 }
+							 getline (in, str);
+						 }
+						}
+						
+							frame (Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy,T );
+							this -> Refresh();
+			 }
+			 }
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		const int RANGE = 42;
 		static int counterX = 0;
@@ -224,57 +284,57 @@ namespace Проект1 {
 		mat R, T1;
 		switch (e->KeyCode) {
 		case Keys::W:
-			move(0, -1, R);
+			move(0, -1.0, R);
 			break;
 		case Keys::S:
-			move(0, 1, R);
+			move(0, 1.0, R);
 			break;
 		case Keys::A:
-			move(-1, 0, R);
+			move(-1.0, 0, R);
 			break;
 		case Keys::D:
-			move(1, 0, R);
+			move(1.0, 0, R);
 			break;
 		case Keys::E:
-			rotate(0.05, R);
+			rotate(0.05F, R);
 			break;
 		case Keys::X:
 			if (-RANGE < counterX && counterX < RANGE) { 
 				counterX++;
 				if (-RANGE < counterZ - 1) {counterZ--;}
 				
-				scale(1.1, 1.1, R);
+				scale(1.1, R);
 			}
 			else {
-				scale(1.0, 1.0, R); 
+				scale(1.0, R); 
 			}
 			//if (-RANGE <= counterZ <= RANGE) { counterZ--; }
 			break; //end template code
 
 		case Keys::Q:
-			rotate(-0.05, R);
+			rotate(-0.05F, R);
 			break;
 		case Keys::Z:
 			//if (-RANGE <= counterX && counterX <= RANGE) { counterX--; }
 			if (-RANGE < counterZ && counterZ < RANGE) {
 				counterZ++;
 				if (-RANGE < counterX - 1) { counterX--; }
-				scale(1 / 1.1, 1 / 1.1, R);
+				scale(1 / 1.1, R);
 			} else {
-				scale(1.0, 1.0, R);
+				scale(1.0, R);
 			}
 			break;
 		case Keys::T:
-			move(0, -5, R);
+			move(0, -5.0, R);
 			break;
 		case Keys::G:
-			move(0, 5, R);
+			move(0, 5.0, R);
 			break;
 		case Keys::F:
-			move(-5, 0, R);
+			move(-5.0, 0, R);
 			break;
 		case Keys::H:
-			move(5, 0, R);
+			move(5.0, 0, R);
 			break;
 		case Keys::U:
 			mirror(0, width, height, R, T);
@@ -283,81 +343,81 @@ namespace Проект1 {
 			mirror(1, width, height, R, T);
 			break;
 		case Keys::R:
-			move(-width / 2, -height / 2, R);
+			move(-width / 2-0.0F, -height / 2-0.0F, R);
 			times(R, T, T1);
 			set(T1, T);
 			rotate(-0.05, R);
 			times(R, T, T1);
 			set(T1, T);
-			move(width / 2, height / 2, R);
+			move(width / 2 - 0.0F, height / 2 - 0.0F, R);
 			break;
 		case Keys::Y:
-			move(-width / 2, -height / 2, R);
+			move(-width / 2 - 0.0F, -height / 2 - 0.0F, R);
 			times(R, T, T1);
 			set(T1, T);
 			rotate(0.05, R);
 			times(R, T, T1);
 			set(T1, T);
-			move(width / 2, height / 2, R);
+			move(width / 2 - 0.0F, height / 2 - 0.0F, R);
 			break;
 		case Keys::C:
-			move(-width / 2, -height / 2, R);
+			move(-width / 2 - 0.0F, -height / 2 - 0.0F, R);
 			times(R, T, T1);
 			set(T1, T);
-			scale(1/1.1, 1/1.1, R);
+			scale(1/1.1, R);
 			times(R, T, T1);
 			set(T1, T);
-			move(width / 2, height / 2, R);
+			move(width / 2 - 0.0F, height / 2 - 0.0F, R);
 			break;
 		case Keys::V:
-			move(-width / 2, -height / 2, R);
+			move(-width / 2 - 0.0F, -height / 2 - 0.0F, R);
 			times(R, T, T1);
 			set(T1, T);
-			scale(1.1, 1.1, R);
+			scale(1.1, R);
 			times(R, T, T1);
 			set(T1, T);
-			move(width / 2, height / 2, R);
+			move(width / 2 - 0.0F, height / 2 - 0.0F, R);
 			break;
 
 
 		
 
-		case Keys::K:
-			move(0, -height / 2, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale_y(1 / 1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(0, height / 2, R);
-			break;
-		case Keys::I:
-			move(0, -height / 2, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale_y(1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(0, height / 2, R);
-			break;
-		case Keys::L:
-			move(-width / 2, 0, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale_x(1 / 1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(width / 2, 0, R);
-			break;
-		case Keys::O:
-			move(-width / 2, 0, R);
-			times(R, T, T1);
-			set(T1, T);
-			scale_x(1.1, R);
-			times(R, T, T1);
-			set(T1, T);
-			move(width / 2, 0, R);
-			break;
+		//case Keys::K:
+		//	move(0, -height / 2 - 0.0F, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	//scale_y(1 / 1.1, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	move(0, height / 2, R);
+		//	break;
+		//case Keys::I:
+		//	move(0, -height / 2, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	//scale_y(1.1, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	move(0, height / 2, R);
+		//	break;
+		//case Keys::L:
+		//	move(-width / 2, 0, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	scale_x(1 / 1.1, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	move(width / 2, 0, R);
+		//	break;
+		//case Keys::O:
+		//	move(-width / 2, 0, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	scale_x(1.1, R);
+		//	times(R, T, T1);
+		//	set(T1, T);
+		//	move(width / 2, 0, R);
+		//	break;
 
 		case Keys::Escape:
 			 unit(T);

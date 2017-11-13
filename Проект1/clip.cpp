@@ -3,6 +3,7 @@
 #include "Transform.h"
 #include <cmath>
 #include "Clip.h"
+#include <math.h> 
 
 using namespace std;
 
