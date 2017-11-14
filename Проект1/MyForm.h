@@ -103,11 +103,10 @@ namespace Проект1 {
 			this->btnOpen->AllowDrop = true;
 			this->btnOpen->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Right));
-			this->btnOpen->AutoEllipsis = true;
 			this->btnOpen->AutoSize = true;
 			this->btnOpen->AutoSizeMode = System::Windows::Forms::AutoSizeMode::GrowAndShrink;
 			this->btnOpen->BackColor = System::Drawing::SystemColors::ControlDark;
-			this->btnOpen->Location = System::Drawing::Point(733, 12);
+			this->btnOpen->Location = System::Drawing::Point(627, 12);
 			this->btnOpen->MinimumSize = System::Drawing::Size(100, 100);
 			this->btnOpen->Name = L"btnOpen";
 			this->btnOpen->Size = System::Drawing::Size(102, 100);
@@ -120,10 +119,11 @@ namespace Проект1 {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(990, 702);
+			this->ClientSize = System::Drawing::Size(884, 562);
 			this->Controls->Add(this->btnOpen);
 			this->KeyPreview = true;
-			this->MinimumSize = System::Drawing::Size(600, 400);
+			this->MaximumSize = System::Drawing::Size(900, 600);
+			this->MinimumSize = System::Drawing::Size(900, 600);
 			this->Name = L"MyForm";
 			this->Text = L"MyForm";
 			this->Load += gcnew System::EventHandler(this, &MyForm::MyForm_Load);
@@ -179,7 +179,7 @@ namespace Проект1 {
 
 		
 
-		/*for (int i = 0; i<lines.Count; i++) {
+		/*for (int i = 0; i<lines.Count; i++) { old method
 			vec A, B;
 			point2vec(lines[i].start, A);
 			point2vec(lines[i].end, B);
@@ -337,10 +337,18 @@ namespace Проект1 {
 			move(5.0, 0, R);
 			break;
 		case Keys::U:
-			mirror(0, width, height, R, T);
+			unit(R);
+			R[1][1] = -1;
+			times(R, T, T1);
+			set(T1, T);
+			move(0, height, R);
 			break;
 		case Keys::J:
-			mirror(1, width, height, R, T);
+			unit(R);
+			R[0][0] = -1;
+			times(R, T, T1);
+			set(T1, T);
+			move(width, 0, R);
 			break;
 		case Keys::R:
 			move(-width / 2-0.0F, -height / 2-0.0F, R);
@@ -382,42 +390,43 @@ namespace Проект1 {
 
 		
 
-		//case Keys::K:
-		//	move(0, -height / 2 - 0.0F, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	//scale_y(1 / 1.1, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	move(0, height / 2, R);
-		//	break;
-		//case Keys::I:
-		//	move(0, -height / 2, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	//scale_y(1.1, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	move(0, height / 2, R);
-		//	break;
-		//case Keys::L:
-		//	move(-width / 2, 0, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	scale_x(1 / 1.1, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	move(width / 2, 0, R);
-		//	break;
-		//case Keys::O:
-		//	move(-width / 2, 0, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	scale_x(1.1, R);
-		//	times(R, T, T1);
-		//	set(T1, T);
-		//	move(width / 2, 0, R);
-		//	break;
+		case Keys::K:
+			move(0, -System::Windows::Forms::Form::ClientRectangle.Height / 2.0, R);
+			times(R, T, T1);
+			set(T1, T);
+			scaleY(1 / 1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(0, System::Windows::Forms::Form::ClientRectangle.Height / 2.0, R);
+			break;
+			break;
+		case Keys::I:
+			move(0, -System::Windows::Forms::Form::ClientRectangle.Height / 2.0, R);
+			times(R, T, T1);
+			set(T1, T);
+			scaleY(1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(0, System::Windows::Forms::Form::ClientRectangle.Height / 2.0, R);
+			break;
+		case Keys::L:
+			move(-width / 2.0, 0, R);
+			times(R, T, T1);
+			set(T1, T);
+			scaleX(1 / 1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(width / 2.0, 0, R);
+			break;
+		case Keys::O:
+			move(-width / 2.0, 0, R);
+			times(R, T, T1);
+			set(T1, T);
+			scaleX(1.1, R);
+			times(R, T, T1);
+			set(T1, T);
+			move(width / 2.0, 0, R);
+			break;
 
 		case Keys::Escape:
 			 unit(T);
@@ -426,7 +435,7 @@ namespace Проект1 {
 			 times(R, T, T1);
 			 set(T1, T);
 			 unit(R);
-			 move(0, -height / 2, R);
+			 move(0, -height / 2.0, R);
 			 times(R, T, T1);
 			 set(T1, T);
 			 unit(R);
@@ -434,9 +443,7 @@ namespace Проект1 {
 			counterX = 0;
 			counterZ = 0;
 			
-		case Keys::P:
-			drawNames = !drawNames;
-			break;
+	
 
 		default:unit(R);
 		}
