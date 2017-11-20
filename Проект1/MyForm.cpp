@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include <fstream>
 #include <sstream>
+#include <array>
+#include <vector>
+#include <stack>
 
 #include "Transform.h"
 #include "Clip.h"
+#include "PClip.h"
 #include "MyForm.h"
 
 using namespace System;
