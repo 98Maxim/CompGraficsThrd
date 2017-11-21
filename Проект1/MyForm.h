@@ -49,6 +49,7 @@ namespace Проект1 {
 	private: float Wcx, Wcy, Wx, Wy;
 	private: float Vcx, Vcy, Vx, Vy;
 	bool drawNames;
+	private: int R, G, B = 0; //для цвета красный зеленый голубой, по умолчанию - черный
 
 	private:
 		/// <summary>
