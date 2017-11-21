@@ -11,4 +11,4 @@ To use that, open file 'задание 6.txt' and write your movable commands
   
 '7' branch is printing too. But it's print polygons. In 'Polygon.txt' you can see example of polygon like "phone tube". That is Kiruos-Back alghorithm.
 
-'8' branch ~work in progress~
+~'8' branch~ work in progress~~
