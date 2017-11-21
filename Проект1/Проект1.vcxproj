@@ -139,7 +139,6 @@
     <ClCompile Include="MyForm.cpp" />
     <ClCompile Include="PClip.cpp" />
     <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="Unchecked.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Clip.h" />
