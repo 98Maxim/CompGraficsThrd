@@ -50,6 +50,9 @@ namespace Проект1 {
 	private: float Vcx, Vcy, Vx, Vy;
 	bool drawNames;
 	private: int R, G, B = 0; //для цвета красный зеленый голубой, по умолчанию - черный
+	private: System::Collections::Generic::List<Color> colors;
+	private: Color col;
+	private: Color rgb;
 
 	private:
 		/// <summary>
@@ -128,12 +131,22 @@ namespace Проект1 {
 		Wy = height - top - bottom;
 		//aaaaaaaa
 
+		col = Color::White;
+		rgb = Color::White;
+
 		//lines.Clear();
 		polygons.Clear();
+		colors.Clear();
 		unit(T);
 	}
 	private: System::Void MyForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
-		System::Drawing::Graphics^ g = e->Graphics;
+		//System::Drawing::Graphics^ g = e->Graphics; Сопоста-
+		//вим значение переменной g не с формой, а с растровым изображением, имеющим
+		//размеры формы
+		Bitmap^ image1 = gcnew Bitmap(this->ClientRectangle.Width, this->ClientRectangle.Height);
+		Graphics^ g = Graphics::FromImage(image1);
+		g->Clear(Color::White);
+
 		System::Drawing::Pen^ blackPen = gcnew Pen(Color::Red);
 		blackPen->Width = 2;
 		Pen^ rectPen = gcnew Pen(Color::Green);
@@ -146,11 +159,14 @@ namespace Проект1 {
 		Pmin.y = top;
 		Pmax.x = Form::ClientRectangle.Width - right;
 		Pmax.y = Form::ClientRectangle.Height - bottom;
+
 		for (int i = 0; i < polygons.Count; i++) {
 			polygon^ p = polygons[i];
 			polygon^ p1 = gcnew polygon(0);
 			point a, b, c;
 			vec A, B, A1, B1;
+			col = colors[i];
+			blackPen->Color = col;
 			for (int j = 0; j < p->Count; j++)
 			{
 				point2vec(p[j], B);
@@ -168,8 +184,12 @@ namespace Проект1 {
 					g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
 					a = b;
 				}
+				PFill(p1, image1, Color::Black, col);
 			}
 		}
+		g = e->Graphics;
+		g->DrawImage(image1, 0, 0);
+		delete image1;
 	}
 	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click on btn
 		if (this->openFileDialog->ShowDialog() ==
@@ -215,6 +235,12 @@ namespace Проект1 {
 								P->Add(p);
 							}
 							polygons.Add(P);
+						}
+						else if (cmd == "color")
+						{
+							int R1, G1, B1;
+							s >> R1 >> G1 >> B1;
+							rgb = Color::FromArgb(R1, G1, B1); colors.Add(rgb);
 						}
 					}
 					getline(in, str);
