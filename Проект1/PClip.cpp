@@ -107,7 +107,7 @@ void PFill(polygon^ P, System::Drawing::Bitmap^ image, System::Drawing::Color Cg
 	ip.x = (int)(s1.x + s2.x) / 2;
 	ip.y = (int)(s1.y + s2.y) / 2;
 
-	S->Add(ip);
+	S->Add(ip); //точка вн
 
 	while (S->Count > 0) {
 		point j = S[S->Count - 1];

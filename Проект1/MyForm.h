@@ -184,7 +184,8 @@ namespace Проект1 {
 					g->DrawLine(blackPen, a.x, a.y, b.x, b.y);
 					a = b;
 				}
-				PFill(p1, image1, Color::Black, col);
+				//PFill(p1, image1, Color::Black, col);
+				PFill(p1, image1, col, col); //цвет заливки и цвет гроаницы совпадает. Третий аргумент - цв грани
 			}
 		}
 		g = e->Graphics;
@@ -240,7 +241,8 @@ namespace Проект1 {
 						{
 							int R1, G1, B1;
 							s >> R1 >> G1 >> B1;
-							rgb = Color::FromArgb(R1, G1, B1); colors.Add(rgb);
+							rgb = Color::FromArgb(R1, G1, B1);
+							colors.Add(rgb);
 						}
 					}
 					getline(in, str);
