@@ -13,7 +13,7 @@ To use that, open file 'задание 6.txt' and write your movable commands
 
 '8' branch about painting, using fill
 
-#Варианты
+# Варианты
  4. - 3 (Kiruos-Back)
  6. - 5
  7. - 2 (Kiruos-Back)
