@@ -40,7 +40,9 @@ namespace Проект1 {
 			}
 		}
 	private: System::Collections::Generic::List<line> lines;
-	private: System::Collections::Generic::List<polygon^> polygons;
+	//private: System::Collections::Generic::List<polygon^> polygons;
+	private: System::Collections::Generic::List<polygon3D^> polygons;
+	private: System::Collections::Generic::List<Color> colors; // для нескольких фигур
 	private: System::Windows::Forms::OpenFileDialog^  openFileDialog;
 	private: System::Windows::Forms::Button^  btnOpen;
 	private: float height;
@@ -49,6 +51,19 @@ namespace Проект1 {
 	private: float Wcx, Wcy, Wx, Wy;
 	private: float Vcx, Vcy, Vx, Vy;
 	bool drawNames;
+
+	float aspect;
+	Color color;
+
+	point3D eye, eye1; // координаты точки наблюдения в мировой системе координат
+	point3D center;    // центр сцены
+	point3D up, up1;
+	float near, near1; // расстояние от наблюдателя до окна наблюдения
+	float far, far1;   // расстояние от наблюдателя до самой удаленной точке
+	float fovy, fovy1; // вертикальный угол
+	bool prOrtho;      // тип нашей проекции
+	float alpha;
+	static point3D ox = { 1, 0, 0 }, oy = { 0, 1, 0 }, oz = { 0, 0, 1 };
 
 	private:
 		/// <summary>
@@ -125,27 +140,61 @@ namespace Проект1 {
 		Wcy = height - bottom;
 		Wx = width - left - right;
 		Wy = height - top - bottom;
+
 		//aaaaaaaa
 
-		//lines.Clear();
-		polygons.Clear();
-		unit(T);
+		aspect = Wx / Wy;
+		alpha = 5 * Math::PI / 180;
+
+		prOrtho = false;
+
+		//lines.Clear(); old
+		//polygons.Clear();
+		//unit(T);
 	}
 	private: System::Void MyForm_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
 		System::Drawing::Graphics^ g = e->Graphics;
+
+		Pen^ pinkpen = gcnew Pen(Color::Pink, 1);
+
 		System::Drawing::Pen^ blackPen = gcnew Pen(Color::Red);
 		blackPen->Width = 2;
 		Pen^ rectPen = gcnew Pen(Color::Green);
 		rectPen->Width = 4;
 		g->DrawRectangle(rectPen, Wcx, top, Wx, Wy);
+
+		if (polygons.Count == 0) return;
+
 		System::Drawing::Font^ drawFont = gcnew System::Drawing::Font("Arial", 8);
+		SolidBrush^ textBrush = gcnew SolidBrush(SystemColors::ScrollBar); //4
+
 		SolidBrush^ drawBrush = gcnew SolidBrush(Color::Red);
 		point Pmin, Pmax;
 		Pmin.x = left;
 		Pmin.y = top;
 		Pmax.x = Form::ClientRectangle.Width - right;
 		Pmax.y = Form::ClientRectangle.Height - bottom;
-		for (int i = 0; i < polygons.Count; i++) {
+
+		mat3D V, U, R, R1;
+		LookAt(eye, center, up, V);
+		if (prOrtho)
+		{
+			float Vy = 2 * near * tan(fovy / 2),
+				Vx = Vy * aspect;
+			Ortho(Vx, Vy, near, far, U);
+		}
+		else
+		{
+			Perspective(fovy, aspect, near, far, U);
+		}
+		g->DrawString(prOrtho ? "Ortho" : "Perspective", drawFont, textBrush, Wx - 690, top + 10); //TODO:Hardcoded
+		times(U, V, R1);
+		times(R1, T, R);
+		mat F;
+		frame(2, 2, -1, -1, Wx, Wy, Wcx, Wcy, F);
+
+
+		/*for (int i = 0; i < polygons.Count; i++) {
 			polygon^ p = polygons[i];
 			polygon^ p1 = gcnew polygon(0);
 			point a, b, c;
@@ -168,11 +217,144 @@ namespace Проект1 {
 					a = b;
 				}
 			}
+		}*/
+		for (int i = 0; i < polygons.Count; i++)
+		{
+			polygon3D^ p = polygons[i]; //braing change 
+			polygon^  p1 = gcnew polygon(0);
+			point3D A;
+			point A1, A2, c;
+			vec3D a, a1;
+			vec a2, a3;
+
+			for (int j = 0; j < p->Count; j++)
+			{
+				point2vec(p[j], a);
+				timesMatVec(R, a, a1);
+				vec2point(a1, A);
+				set(A, A1);
+
+				point2vec(A1, a2);
+
+				timesMatVec(F, a2, a3);
+				vec2point(a3, A2);
+				p1->Add(A2);
+			}
+
+			p1 = Pclip(p1, Pmin, Pmax);
+			if (p1->Count !=0)
+			{
+				pinkpen->Color = colors[i];
+				c = p1[p1->Count - 1];
+				for (int j = 0; j < p1->Count; j++)
+				{
+					g->DrawLine(pinkpen, c.x, c.y, p1[j].x, p1[j].y);
+					c = p1[j];
+				}
+			}
 		}
 	}
 	private: System::Void btnOpen_Click(System::Object^  sender, System::EventArgs^  e) { //click on btn
+
+		System::IO::Stream^ inputStream;
+
 		if (this->openFileDialog->ShowDialog() ==
-			System::Windows::Forms::DialogResult::OK) {
+			System::Windows::Forms::DialogResult::OK)
+		{
+			polygons.Clear();
+			colors.Clear();
+			color = Drawing::Color::Black;
+
+			String^ fileName = this->openFileDialog->InitialDirectory +
+				this->openFileDialog->FileName;
+			array<String^>^ cmdList = System::IO::File::ReadAllLines(fileName);
+			String^ delimStr = " ";
+			array<Char>^ delimiter = delimStr->ToCharArray();
+
+			try {
+				for each (String^ cmd in cmdList)
+				{
+					if (cmd == "" || cmd[0] == '#')
+						continue;
+
+					array<String^>^ line = cmd->Split(delimiter);
+					if (line[0] == "triangle")
+					{
+						polygon3D^ triangle = gcnew polygon3D();
+						for (int i = 1; i < 9; i += 3)
+						{
+							point3D tmpPoint;
+							if (float::TryParse(line[i], tmpPoint.x)
+								&& float::TryParse(line[i + 1], tmpPoint.y)
+								&& float::TryParse(line[i + 2], tmpPoint.z) != true)
+							{
+								throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
+							}
+							triangle->Add(tmpPoint);
+						}
+						polygons.Add(triangle);
+						colors.Add(color);
+					}
+					else if (line[0] == "color")
+					{
+						int r, g, b;
+						if (int::TryParse(line[1], r)
+							&& int::TryParse(line[2], g)
+							&& int::TryParse(line[3], b) != true)
+						{
+							throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
+						}
+						color = Color::FromArgb(r, g, b);
+					}
+					else if (line[0] == "lookat")
+					{
+						if (float::TryParse(line[1], eye.x)
+							&& float::TryParse(line[2], eye.y)
+							&& float::TryParse(line[3], eye.z)
+							&& float::TryParse(line[4], center.x)
+							&& float::TryParse(line[5], center.y)
+							&& float::TryParse(line[6], center.z)
+							&& float::TryParse(line[7], up.x)
+							&& float::TryParse(line[8], up.y)
+							&& float::TryParse(line[9], up.z) != true)
+						{
+							throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
+						}
+						eye1 = eye;
+						up1 = up;
+					}
+					else if (line[0] == "screen")
+					{
+						float tmpFovy;
+						if (float::TryParse(line[1], tmpFovy)
+							&& float::TryParse(line[2], near)
+							&& float::TryParse(line[3], far) != true)
+						{
+							throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
+						}
+						fovy = fovy1 = tmpFovy * Math::PI / 180;
+						near1 = near;
+					}
+				}
+			}
+			catch (Exception ^e)
+			{
+				MessageBox::Show(e->ToString());
+			}
+			
+			//inputStream->Close(); падает nulllllllllllllllllllllllllllll?
+
+			LookAt(center, eye, up1, T);
+			vec3D eyeT;
+			point2vec(eye, eyeT);
+			timesMatVec(T, eyeT, eyeT);
+			eye.x = eyeT[0];
+			eye.y = eyeT[1];
+			eye.z = eyeT[2];
+
+			this->Refresh();
+		}
+			/* {
 			wchar_t fileName[1024];
 			for (int i = 0; i<openFileDialog->FileName->Length; i++)
 				fileName[i] = openFileDialog->FileName[i];
@@ -182,6 +364,8 @@ namespace Проект1 {
 			if (in.is_open())
 			{
 				polygons.Clear();
+				colors.Clear();
+				color = Drawing::Color::Black;
 				std::stack<mat> matStack;
 				mat K;
 				unit(K);
@@ -220,69 +404,87 @@ namespace Проект1 {
 				}
 			}
 			this->Refresh();
-		}
+		}*/
 	}
 	private: System::Void MyForm_KeyDown(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
 		const int RANGE = 42;
 		static int counterX = 0;
 		static int counterZ = 0;
-		mat R, T1;
+		//mat R, T1;
+
+		point3D ox = { 1, 0, 0 },
+			oy = { 0, 1, 0 },
+			oz = { 0, 0, 1 };
+		mat3D R;
+		unit(R);
+
 		switch (e->KeyCode) {
 		case Keys::W:
-			move(0, -1.0, R);
+			rotate(ox, alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::S:
-			move(0, 1.0, R);
+			rotate(ox, -alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::A:
-			move(-1.0, 0, R);
+			rotate(oy, alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::D:
-			move(1.0, 0, R);
+			rotate(oy, -alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::E:
-			rotate(0.05F, R);
+			rotate(oz, -alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::X:
 			if (-RANGE < counterX && counterX < RANGE) {
 				counterX++;
 				if (-RANGE < counterZ - 1) { counterZ--; }
 
-				scale(1.1, R);
+				if (near > 1) near -= 1;
 			}
 			else {
-				scale(1.0, R);
+				if (near > 1) near -= 1;
 			}
 			//if (-RANGE <= counterZ <= RANGE) { counterZ--; }
 			break; //end template code
 
 		case Keys::Q:
-			rotate(-0.05F, R);
+			rotate(oz, alpha, R);
+			times(R, T, T);
 			break;
 		case Keys::Z:
 			//if (-RANGE <= counterX && counterX <= RANGE) { counterX--; }
 			if (-RANGE < counterZ && counterZ < RANGE) {
 				counterZ++;
 				if (-RANGE < counterX - 1) { counterX--; }
-				scale(1 / 1.1, R);
+				near += 1;
 			}
 			else {
-				scale(1.0, R);
+				near += 1;
 			}
 			break;
-		case Keys::T:
-			move(0, -5.0, R);
+
+		case Keys::C:
+			fovy -= Math::PI / 180;
 			break;
-		case Keys::G:
-			move(0, 5.0, R);
+
+		case Keys::V:
+			fovy += Math::PI / 180;
 			break;
-		case Keys::F:
-			move(-5.0, 0, R);
+
+		case Keys::O:
+			alpha *= 1.1;
 			break;
-		case Keys::H:
-			move(5.0, 0, R);
+
+		case Keys::L:
+			alpha /= 1.1;
 			break;
-		case Keys::U:
+
+		/*case Keys::U:
 			reflectH(R);
 			times(R, T, T1);
 			set(T1, T);
@@ -370,11 +572,16 @@ namespace Проект1 {
 			times(R, T, T1);
 			set(T1, T);
 			move(width / 2.0, 0, R);
+			break;*/
+
+
+		case Keys::P:
+			prOrtho ^= 1;
 			break;
 
 		case Keys::Escape:
-			unit(T);
-			unit(R);
+			//unit(T);
+			//unit(R);
 			////mirror(1, width, height, R, T);
 			//times(R, T, T1);
 			//set(T1, T);
@@ -383,16 +590,29 @@ namespace Проект1 {
 			//times(R, T, T1);
 			//set(T1, T);
 			//unit(R);
-			frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
+			//frame(Vx, Vy, Vcx, Vcy, Wx, Wy, Wcx, Wcy, T);
 			counterX = 0;
 			counterZ = 0;
+
+			LookAt(center, eye1, up1, T);
+			vec3D eyeT;
+			point2vec(eye1, eyeT);
+			timesMatVec(T, eyeT, eyeT);
+			eye.x = eyeT[0];
+			eye.y = eyeT[1];
+			eye.z = eyeT[2];
+
+			up = up1;
+			near = near1;
+			fovy = fovy1;
+
 
 
 
 		default:unit(R);
 		}
-		times(R, T, T1);
-		set(T1, T);
+		/*times(R, T, T1);
+		set(T1, T);*/
 		this->Refresh();
 	}
 	private: System::Void MyForm_Resize(System::Object^  sender, System::EventArgs^  e) { //TODO
@@ -400,8 +620,10 @@ namespace Проект1 {
 		Wcy = Form::ClientRectangle.Height - bottom;
 		Wx = Form::ClientRectangle.Width - left - right;
 		Wy = Form::ClientRectangle.Height - top - bottom;
+		aspect = Wx / Wy;
 
 		this->Refresh(); //обновляет форму?
+	
 	}
 };
 }
