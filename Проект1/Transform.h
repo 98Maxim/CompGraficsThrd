@@ -10,7 +10,7 @@ value struct point {
 
 value struct point3D
 {
-	float x, y, z;
+	double x, y, z;
 };
 
 value struct line {

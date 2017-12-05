@@ -284,12 +284,13 @@ namespace Проект1 {
 						for (int i = 1; i < 9; i += 3)
 						{
 							point3D tmpPoint;
-							if (float::TryParse(line[i], tmpPoint.x)
-								&& float::TryParse(line[i + 1], tmpPoint.y)
-								&& float::TryParse(line[i + 2], tmpPoint.z) != true)
-							{
-								throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
-							}
+							
+							double::TryParse(line[1], tmpPoint.x);
+							double::TryParse(line[2], tmpPoint.y);
+							double::TryParse(line[3], tmpPoint.z);
+							tmpPoint.x;
+							tmpPoint.y;
+							tmpPoint.z;
 							triangle->Add(tmpPoint);
 						}
 						polygons.Add(triangle);
@@ -308,15 +309,15 @@ namespace Проект1 {
 					}
 					else if (line[0] == "lookat")
 					{
-						if (float::TryParse(line[1], eye.x)
-							&& float::TryParse(line[2], eye.y)
-							&& float::TryParse(line[3], eye.z)
-							&& float::TryParse(line[4], center.x)
-							&& float::TryParse(line[5], center.y)
-							&& float::TryParse(line[6], center.z)
-							&& float::TryParse(line[7], up.x)
-							&& float::TryParse(line[8], up.y)
-							&& float::TryParse(line[9], up.z) != true)
+						if (double::TryParse(line[1], eye.x)
+							&& double::TryParse(line[2], eye.y)
+							&& double::TryParse(line[3], eye.z)
+							&& double::TryParse(line[4], center.x)
+							&& double::TryParse(line[5], center.y)
+							&& double::TryParse(line[6], center.z)
+							&& double::TryParse(line[7], up.x)
+							&& double::TryParse(line[8], up.y)
+							&& double::TryParse(line[9], up.z) != true)
 						{
 							throw gcnew Exception("Failed to read parameters of the operation " + line[0]);
 						}
