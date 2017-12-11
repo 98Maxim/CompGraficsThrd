@@ -14,7 +14,7 @@ To use that, open file 'задание 6.txt' and write your movable commands
 '8' branch about painting, using fill
 
 # Варианты
-3 default
+3(master) default
 
 4  -3 (Kiruos-Back)
  
