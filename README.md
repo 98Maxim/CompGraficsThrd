@@ -14,7 +14,15 @@ To use that, open file 'задание 6.txt' and write your movable commands
 '8' branch about painting, using fill
 
 # Варианты
- 4. - 3 (Kiruos-Back)
- 6. - 5
- 7. - 2 (Kiruos-Back)
- 8. - 2 (Построчная заливка до границ, с нахождением внутренней точки)
+3 default
+
+4  -3 (Kiruos-Back)
+ 
+ 6  -5
+ 
+ 7  -2 (Kiruos-Back)
+ 
+ 8  -2 (Построчная заливка до границ, с нахождением внутренней точки)
+ 
+ 9 -default
+ 
